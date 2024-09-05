@@ -6,7 +6,7 @@ from extensions import db
 from models import Assignment
 
 # Load the dotenv file
-load_dotenv()
+# load_dotenv()
 
 app = Flask(__name__)
 
