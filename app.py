@@ -17,6 +17,11 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
 
+@app.route("/", methods=["GET"])
+def home():
+    return "Hello PAS!"
+
+
 @app.route("/api/assignments", methods=["GET"])
 def get_assignments():
     # Fetch all assignments
@@ -44,5 +49,5 @@ def create_assignment():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=os.getenv("PORT", default=5000), host="0.0.0.0")
-    
+    app.run(debug=True, port=os.getenv("PORT", default=5000))
+
