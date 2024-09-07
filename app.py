@@ -80,10 +80,21 @@ def get_assignments():
     # Check if completed is provided
     completed = request.args.get("c", default=False, type=bool)
 
-    # Fetch all assignments
-    assignments = Assignment.query.filter(
-        Assignment.uid == uid, Assignment.is_completed == completed
-    ).all()
+    # Check if task_id is provided
+    task_id = request.args.get("tid", default=None, type=int)
+
+    if task_id:
+        # Fetch all assignments for a specific task_id
+        assignments = Assignment.query.filter(
+            Assignment.uid == uid,
+            Assignment.is_completed == completed,
+            Assignment.task_id == task_id,
+        ).all()
+    else:
+        # Fetch all assignments
+        assignments = Assignment.query.filter(
+            Assignment.uid == uid, Assignment.is_completed == completed
+        ).all()
 
     # If no assignments found, return 404
     if not assignments:
@@ -152,7 +163,7 @@ def set_assignment_by_recipient(recipient_email, todo_id, task_id):
         .first()
     )
 
-    # If the assignment exists, mark it as completed by update the 
+    # If the assignment exists, mark it as completed by update the
     # completed_date and is_completed fields
     if assignment:
         assignment.completed_date = datetime.now()
