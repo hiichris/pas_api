@@ -4,6 +4,9 @@ from models import APIToken
 from flask_mail import Message
 
 
+COMPLETION_STATUS_ENDPOINT = "https//pasapi-dev.up.railway.app/api/assignment/{}/complete"
+
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -23,13 +26,33 @@ def token_required(f):
     return decorated
 
 
-def send_email(mail, send_to, email_message):
+def send_email(mail, sender_name, recipient_name, recipient_email, assignment):
     msg = Message(
-        'Hello from Flask',
-        recipients=[send_to]  # Replace with the recipient's email address
+        f"🍅 Todomato: Hi {recipient_name}, {sender_name} has assigned you a task!",
+        recipients=[recipient_email],
     )
-    msg.html = """
-    Can I use the <b>html</b> tag here?
-    """
+    msg.html = f"""
+        <p>👋 Hi {recipient_name},</p>
+        <p>This is an automated email from Todomato app.
+        {sender_name} has assigned you a task!</p>
+        <p>Please complete the following task:</p>
+        <p><font face="Courier New" size="2"><b>{assignment}</b></font></p>
+        <br/>
+        <p>
+            Once you have completed the task, please click
+            <a href="{COMPLETION_STATUS_ENDPOINT.format(recipient_email)}">
+                ✅ Mark as completed
+            </a>.
+        </p>
 
-    mail.send(msg)
+        <p>
+            Cheers, <br/>
+            🍅 Todomato Team
+        </p>
+    """
+    try:
+        mail.send(msg)
+        return True
+    except Exception as e:
+        print(e)
+        return False

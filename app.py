@@ -101,10 +101,11 @@ def create_assignment():
     new_assignment = Assignment(
         todo_id=data["todo_id"],
         task_id=data["task_id"],
-        from_name=data["from_name"] if "from_name" in data else None,
-        from_email=data["from_email"] if "from_email" in data else None,
+        from_name=data["from_name"] if "from_name" in data else "",
+        to_name=data["to_name"] if "to_name" in data else "",
         to_email=data["to_email"],
         uid=data["uid"],
+        assignment=data["assignment"] if "assignment" in data else "",
     )
     print(new_assignment.serialize())
 
@@ -112,10 +113,26 @@ def create_assignment():
     db.session.commit()
 
     # Send an email notification
-    status = send_email(mail, new_assignment.to_email, "Assignment created")
-    print(f"Email status: {status}")
+    email_status = send_email(
+        mail,
+        new_assignment.from_name,
+        new_assignment.to_name,
+        new_assignment.to_email,
+        new_assignment.assignment,
+    )
+    if email_status:
+        print("Email sent successfully")
 
-    return jsonify(new_assignment.serialize()), 201
+    return (
+        jsonify(
+            {
+                "success": True,
+                "message": "Assignment created",
+                "email_success": email_status,
+            }
+        ),
+        201,
+    )
 
 
 if __name__ == "__main__":
