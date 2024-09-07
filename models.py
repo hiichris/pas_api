@@ -36,6 +36,7 @@ class Assignment(db.Model):
         }
 
 
+# API Token model
 class APIToken(db.Model):
     __tablename__ = "api_tokens"
 

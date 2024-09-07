@@ -1,17 +1,14 @@
 import os
 from datetime import datetime
 
-from dotenv import load_dotenv
-from datetime import datetime
-
-from flask_mail import Mail, Message
-from flask import Flask, jsonify, request, request
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+from flask_mail import Mail
+from flask import Flask, jsonify, request
 
 from extensions import db
 from models import Assignment, APIToken
 from helpers import token_required, send_email
 
+# Create a Flask app
 app = Flask(__name__)
 
 # Configure the database
@@ -31,7 +28,7 @@ mail = Mail(app)
 # Initialize the database
 db.init_app(app)
 
-
+# User dummy data structure for create a token
 users = {"": {"password": ""}}
 
 
@@ -50,6 +47,7 @@ def login():
     # Check if user already has a persistent token
     existing_token = APIToken.query.filter_by(user_email=email).first()
 
+    # If user already has a token, return it
     if existing_token:
         token = existing_token.token
         print(f"User {email} already has a token: {token}")
@@ -64,11 +62,13 @@ def login():
     return jsonify(api_token=token), 200
 
 
+# Default home route for checking the server status
 @app.route("/", methods=["GET"])
 def home():
     return "Hello PAS!"
 
 
+# Get all assignments for a specific uid
 @app.route("/api/assignments", methods=["GET"])
 @token_required
 def get_assignments():
@@ -93,6 +93,7 @@ def get_assignments():
     return jsonify([assignment.serialize() for assignment in assignments])
 
 
+# Create a new assignment
 @app.route("/api/assignment", methods=["POST"])
 @token_required
 def create_assignment():
@@ -110,9 +111,11 @@ def create_assignment():
     )
     print(new_assignment.serialize())
 
+    # Add the new assignment to the database
     db.session.add(new_assignment)
     db.session.commit()
     print("Assignment created in DB")
+
     # Send an email notification
     email_status = send_email(
         mail,
@@ -133,10 +136,12 @@ def create_assignment():
     )
 
 
+# Mark an assignment as completed route for the recipient
 @app.route(
     "/api/assignment/<recipient_email>/<todo_id>/<task_id>/complete", methods=["GET"]
 )
 def set_assignment_by_recipient(recipient_email, todo_id, task_id):
+    # Check if the assignment exists
     assignment = (
         db.session.query(Assignment)
         .filter(
@@ -147,6 +152,8 @@ def set_assignment_by_recipient(recipient_email, todo_id, task_id):
         .first()
     )
 
+    # If the assignment exists, mark it as completed by update the 
+    # completed_date and is_completed fields
     if assignment:
         assignment.completed_date = datetime.now()
         assignment.is_completed = True
@@ -158,14 +165,16 @@ def set_assignment_by_recipient(recipient_email, todo_id, task_id):
         # Return a simple message in html
         return "<h3>🎉 Assignment completed successfully!</h3>"
     else:
+        # Otherwise, return a 404 and a message
         print(f"Assignment not found for {recipient_email}!")
         return "<h3>❌ Assignment not found!</h3>", 404
 
 
+# General error handler for 404
 @app.errorhandler(404)
 def page_not_found(error):
     return jsonify({"success": False, "error": "Something went wrong!"}), 404
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=os.getenv("PORT", default=5000))
+    app.run(debug=True, port=os.getenv("PORT", default="5000"))
