@@ -153,18 +153,13 @@ def set_assignment_by_recipient(recipient_email, todo_id, task_id):
 
         # Commit the changes
         db.session.commit()
-        print(f"Assignment {assignment.id} completed by {recipient_email}!")
-        return jsonify(
-            {
-                "success": True,
-                "message": "Assignment completed",
-                "todo_id": todo_id,
-                "task_id": task_id,
-            }
-        )
+        print(f"Assignment completed for {recipient_email}!")
+
+        # Return a simple message in html
+        return "<h3>🎉 Assignment completed successfully!</h3>"
     else:
         print(f"Assignment not found for {recipient_email}!")
-        return jsonify({"success": False, "message": "Not found"}), 404
+        return "<h3>❌ Assignment not found!</h3>", 404
 
 
 @app.errorhandler(404)
