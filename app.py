@@ -163,11 +163,11 @@ def set_assignment_by_recipient(recipient_email, todo_id, task_id):
         print(f"Assignment completed for {recipient_email}!")
 
         # Return a simple message in html
-        return "<h3>🎉 Assignment completed successfully!</h3>"
+        return "<center><h3>🎉 Assignment completed successfully!</h3></center>"
     else:
         # Otherwise, return a 404 and a message
         print(f"Assignment not found for {recipient_email}!")
-        return "<h3>❌ Assignment not found!</h3>", 404
+        return "<center><h3>❌ Assignment not found!</h3></center>", 404
 
 
 # General error handler for 404
