@@ -5,31 +5,35 @@ import uuid
 
 # Assignement model
 class Assignment(db.Model):
-    __tablename__ = 'assignments'
+    __tablename__ = "assignments"
     id = db.Column(db.Integer, primary_key=True)
-    todo_id = db.Column(db.Integer)
-    from_name = db.Column(db.String(100), nullable=False)
+    todo_id = db.Column(db.Integer, nullable=False)
+    task_id = db.Column(db.Integer, nullable=False)
+    from_name = db.Column(db.String(100), nullable=True)
     from_email = db.Column(db.String(100), nullable=True)
-    token = db.Column(db.String(200), nullable=True)
+    uid = db.Column(db.String(100), nullable=False)
     is_completed = db.Column(db.Boolean, nullable=False, default=False)
     request_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
     completed_date = db.Column(db.DateTime, nullable=True)
 
     def serialize(self):
         return {
-            'id': self.id,
-            'todo_id': self.todo_id,
-            'from_name': self.from_name,
-            'from_email': self.from_email,
-            'token': self.token,
-            'is_completed': self.is_completed,
-            'request_date': self.request_date.isoformat(),
-            'completed_date': self.completed_date.isoformat() if self.completed_date else None
+            "id": self.id,
+            "todo_id": self.todo_id,
+            "task_id": self.task_id,
+            "from_name": self.from_name,
+            "from_email": self.from_email,
+            "uid": self.uid,
+            "is_completed": self.is_completed,
+            "request_date": self.request_date,
+            "completed_date": (
+                self.completed_date.isoformat() if self.completed_date else None
+            ),
         }
 
 
 class APIToken(db.Model):
-    __tablename__ = 'api_tokens'
+    __tablename__ = "api_tokens"
 
     token_id = db.Column(db.Integer, primary_key=True)
     token = db.Column(db.String(200), nullable=False, unique=True)
@@ -42,7 +46,7 @@ class APIToken(db.Model):
 
     def serialize(self):
         return {
-            'token_id': self.token_id,
-            'token': self.token,
-            'created_date': self.created_date.isoformat()
+            "token_id": self.token_id,
+            "token": self.token,
+            "created_date": self.created_date.isoformat(),
         }

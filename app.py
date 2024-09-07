@@ -1,10 +1,9 @@
 import os
-import uuid
 
 from dotenv import load_dotenv
 from datetime import datetime
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, request
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 
 from extensions import db
@@ -21,16 +20,15 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
 
 
-users = {
-    "": {"password": ""}
-}
+users = {"": {"password": ""}}
+
 
 # Login route to generate a long-lived API token
-@app.route('/login', methods=['POST'])
+@app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
+    email = data.get("email")
+    password = data.get("password")
 
     # Check if the user exists and the password matches
     user = users.get(email)
@@ -62,20 +60,41 @@ def home():
 @app.route("/api/assignments", methods=["GET"])
 @token_required
 def get_assignments():
+    # Check if uid is provided
+    uid = request.args.get("u")
+    if not uid:
+        return jsonify({"success": False, "message": "UID is missing"}), 400
+
+    # Check if completed is provided
+    completed = request.args.get("c", default=False, type=bool)
+
     # Fetch all assignments
-    assignments = Assignment.query.all()
+    assignments = Assignment.query.filter(
+        Assignment.uid == uid, Assignment.is_completed == completed
+    ).all()
+
+    # If no assignments found, return 404
+    if not assignments:
+        return jsonify({"success": False, "message": "No assignments found"}), 404
+    
+    # Return the serialized assignments
     return jsonify([assignment.serialize() for assignment in assignments])
 
 
 @app.route("/api/assignment", methods=["POST"])
 @token_required
 def create_assignment():
+    # Get the data from the request
     data = request.get_json()
+    # Create a new assignment
     new_assignment = Assignment(
         todo_id=data["todo_id"],
-        from_name=data["from_name"],
-        from_email=data["from_email"],
+        task_id=data["task_id"],
+        from_name=data["from_name"] if "from_name" in data else None,
+        from_email=data["from_email"] if "from_email" in data else None,
+        uid=data["uid"],
     )
+    print(new_assignment.serialize())
 
     db.session.add(new_assignment)
     db.session.commit()
