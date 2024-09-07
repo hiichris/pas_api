@@ -5,7 +5,7 @@ from flask_mail import Message
 
 
 COMPLETION_STATUS_ENDPOINT = (
-    "https//pasapi-dev.up.railway.app/api/assignment/{}/{}/{}/complete"
+    "https://pasapi-dev.up.railway.app/api/assignment/{}/{}/{}/complete"
 )
 
 
