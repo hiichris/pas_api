@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from functools import wraps
 from models import APIToken
+from flask_mail import Message
 
 
 def token_required(f):
@@ -20,3 +21,15 @@ def token_required(f):
         return f(*args, **kwargs)
 
     return decorated
+
+
+def send_email(mail, send_to, email_message):
+    msg = Message(
+        'Hello from Flask',
+        recipients=[send_to]  # Replace with the recipient's email address
+    )
+    msg.html = """
+    Can I use the <b>html</b> tag here?
+    """
+
+    mail.send(msg)

@@ -11,6 +11,7 @@ class Assignment(db.Model):
     task_id = db.Column(db.Integer, nullable=False)
     from_name = db.Column(db.String(100), nullable=True)
     from_email = db.Column(db.String(100), nullable=True)
+    to_email = db.Column(db.String(100), nullable=False)
     uid = db.Column(db.String(100), nullable=False)
     is_completed = db.Column(db.Boolean, nullable=False, default=False)
     request_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
@@ -21,8 +22,9 @@ class Assignment(db.Model):
             "id": self.id,
             "todo_id": self.todo_id,
             "task_id": self.task_id,
-            "from_name": self.from_name,
-            "from_email": self.from_email,
+            "from_name": self.from_name if self.from_name else None,
+            "from_email": self.from_email if self.from_email else None,
+            "to_email": self.to_email,
             "uid": self.uid,
             "is_completed": self.is_completed,
             "request_date": self.request_date,

@@ -3,18 +3,29 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 
+from flask_mail import Mail, Message
 from flask import Flask, jsonify, request, request
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 
 from extensions import db
 from models import Assignment, APIToken
-from helpers import token_required
+from helpers import token_required, send_email
 
 app = Flask(__name__)
 
+# Configure the database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Configure the smtp server
+app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER")
+app.config["MAIL_PORT"] = os.environ.get("MAIL_PORT")
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER")
+
+mail = Mail(app)
 
 # Initialize the database
 db.init_app(app)
@@ -76,7 +87,7 @@ def get_assignments():
     # If no assignments found, return 404
     if not assignments:
         return jsonify({"success": False, "message": "No assignments found"}), 404
-    
+
     # Return the serialized assignments
     return jsonify([assignment.serialize() for assignment in assignments])
 
@@ -92,12 +103,17 @@ def create_assignment():
         task_id=data["task_id"],
         from_name=data["from_name"] if "from_name" in data else None,
         from_email=data["from_email"] if "from_email" in data else None,
+        to_email=data["to_email"],
         uid=data["uid"],
     )
     print(new_assignment.serialize())
 
     db.session.add(new_assignment)
     db.session.commit()
+
+    # Send an email notification
+    status = send_email(mail, new_assignment.to_email, "Assignment created")
+    print(f"Email status: {status}")
 
     return jsonify(new_assignment.serialize()), 201
 
