@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from dotenv import load_dotenv
 from datetime import datetime
@@ -111,14 +112,11 @@ def create_assignment():
 
     db.session.add(new_assignment)
     db.session.commit()
-
+    print("Assignment created in DB")
     # Send an email notification
     email_status = send_email(
         mail,
-        new_assignment.from_name,
-        new_assignment.to_name,
-        new_assignment.to_email,
-        new_assignment.assignment,
+        data,
     )
     if email_status:
         print("Email sent successfully")
@@ -133,6 +131,45 @@ def create_assignment():
         ),
         201,
     )
+
+
+@app.route(
+    "/api/assignment/<recipient_email>/<todo_id>/<task_id>/complete", methods=["GET"]
+)
+def set_assignment_by_recipient(recipient_email, todo_id, task_id):
+    assignment = (
+        db.session.query(Assignment)
+        .filter(
+            Assignment.todo_id == todo_id,
+            Assignment.task_id == task_id,
+            Assignment.to_email == recipient_email,
+        )
+        .first()
+    )
+
+    if assignment:
+        assignment.completed_date = datetime.now()
+        assignment.is_completed = True
+
+        # Commit the changes
+        db.session.commit()
+        print(f"Assignment {assignment.id} completed by {recipient_email}!")
+        return jsonify(
+            {
+                "success": True,
+                "message": "Assignment completed",
+                "todo_id": todo_id,
+                "task_id": task_id,
+            }
+        )
+    else:
+        print(f"Assignment not found for {recipient_email}!")
+        return jsonify({"success": False, "message": "Not found"}), 404
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return jsonify({"success": False, "error": "Something went wrong!"}), 404
 
 
 if __name__ == "__main__":

@@ -4,7 +4,9 @@ from models import APIToken
 from flask_mail import Message
 
 
-COMPLETION_STATUS_ENDPOINT = "https//pasapi-dev.up.railway.app/api/assignment/{}/complete"
+COMPLETION_STATUS_ENDPOINT = (
+    "https//pasapi-dev.up.railway.app/api/assignment/{}/{}/{}/complete"
+)
 
 
 def token_required(f):
@@ -26,21 +28,28 @@ def token_required(f):
     return decorated
 
 
-def send_email(mail, sender_name, recipient_name, recipient_email, assignment):
+def send_email(mail, assignment):
+    print(assignment)
     msg = Message(
-        f"🍅 Todomato: Hi {recipient_name}, {sender_name} has assigned you a task!",
-        recipients=[recipient_email],
+        f"🍅 Todomato: Hi {assignment['from_name']}, {assignment['to_name']} "
+        "has assigned you a task!",
+        recipients=[assignment["to_email"]],
     )
     msg.html = f"""
-        <p>👋 Hi {recipient_name},</p>
+        <p>👋 Hi {assignment["to_name"]},</p>
         <p>This is an automated email from Todomato app.
-        {sender_name} has assigned you a task!</p>
+        {assignment["from_name"]} has assigned you a task!</p>
         <p>Please complete the following task:</p>
-        <p><font face="Courier New" size="2"><b>{assignment}</b></font></p>
+        <p><font face="Courier New" size="2">
+        <b>{assignment["assignment"]}</b></font></p>
         <br/>
         <p>
             Once you have completed the task, please click
-            <a href="{COMPLETION_STATUS_ENDPOINT.format(recipient_email)}">
+            <a href="{COMPLETION_STATUS_ENDPOINT.format(
+                assignment["to_email"],
+                assignment["todo_id"],
+                assignment["task_id"]
+            )}">
                 ✅ Mark as completed
             </a>.
         </p>
