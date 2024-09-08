@@ -149,16 +149,16 @@ def create_assignment():
 
 # Mark an assignment as completed route for the recipient
 @app.route(
-    "/api/assignment/<recipient_email>/<todo_id>/<task_id>/complete", methods=["GET"]
+    "/api/assignment/<uid>/<todo_id>/<task_id>/complete", methods=["GET"]
 )
-def set_assignment_by_recipient(recipient_email, todo_id, task_id):
+def set_assignment_by_recipient(uid, todo_id, task_id):
     # Check if the assignment exists
     assignment = (
         db.session.query(Assignment)
         .filter(
             Assignment.todo_id == todo_id,
             Assignment.task_id == task_id,
-            Assignment.to_email == recipient_email,
+            Assignment.uid == uid,
         )
         .first()
     )

@@ -52,7 +52,7 @@ def send_email(mail, assignment):
         <p>
             Once you have completed the task, please click
             <a href="{COMPLETION_STATUS_ENDPOINT.format(
-                assignment["to_email"],
+                assignment["uid"],
                 assignment["todo_id"],
                 assignment["task_id"]
             )}">
