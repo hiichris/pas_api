@@ -36,7 +36,7 @@ def token_required(f):
 def send_email(mail, assignment):
     # Create a message object
     msg = Message(
-        f"🍅 Todomato: Hi {assignment['from_name']}, {assignment['to_name']} "
+        f"🍅 Todomato: Hi {assignment['to_name']}, {assignment['from_name']} "
         "has assigned you a task!",
         recipients=[assignment["to_email"]],
     )
