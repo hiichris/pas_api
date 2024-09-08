@@ -181,6 +181,29 @@ def set_assignment_by_recipient(recipient_email, todo_id, task_id):
         return "<center><h3>❌ Assignment not found!</h3></center>", 404
 
 
+# Check if the task is completed
+@app.route("/api/assignment/<uid>/<todo_id>/<task_id>/status", methods=["GET"])
+@token_required
+def check_assignment_status(uid, todo_id, task_id):
+    # Check if the assignment exists
+    assignment = (
+        db.session.query(Assignment)
+        .filter(
+            Assignment.todo_id == todo_id,
+            Assignment.task_id == task_id,
+            Assignment.uid == uid,
+        )
+        .first()
+    )
+
+    # If the assignment exists, return the status
+    if assignment:
+        return jsonify({"success": True, "is_completed": assignment.is_completed})
+    else:
+        # Otherwise, return a 404 and a message
+        return jsonify({"success": False, "message": "Assignment not found"}), 404
+
+
 # General error handler for 404
 @app.errorhandler(404)
 def page_not_found(error):
